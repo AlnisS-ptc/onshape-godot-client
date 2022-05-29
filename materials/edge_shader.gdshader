@@ -16,11 +16,11 @@ void fragment() {
 	
 //	if (-pixel_position.z < z_dist - 0.04) {
 	float ratio = -pixel_position.z / z_dist;
-	if (ratio < 0.97) {
+	if (ratio < 0.995) {
 //		ALBEDO = vec3(1.0);
 		discard;
 	} else {
-		ALPHA = clamp((ratio - 0.97) / 0.03, 0.0, 1.0);
+		ALPHA = clamp((ratio - 0.995) / 0.002, 0.0, 1.0);
 		ALBEDO = vec3(0.0);
 	}
 
