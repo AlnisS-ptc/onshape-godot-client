@@ -2,6 +2,7 @@ tool
 
 extends Spatial
 
+var face_material = preload("res://materials/face_material.material")
 
 var last_mouse_position = Vector2.ZERO
 
@@ -52,34 +53,35 @@ func generate_bwh_edges():
 
 
 func generate_bwh_faces():
-	var verts = PoolVector3Array()
-	var normals = PoolVector3Array()
-	var indices = PoolIntArray()
-	
-	
 	var file = File.new()
 	file.open("res://data/bwh_faces.json", File.READ)
 	var faces = parse_json(file.get_as_text())
 	
-	var i = 0
+	$Faces.mesh.clear_surfaces()
+	
+	var face_index = 0
 	for body in faces.bodies:
 		for face in body.faces:
+			
+			var verts = PoolVector3Array()
+			var normals = PoolVector3Array()
+			
 			for facet in face.facets:
-				var normal = -Vector3(facet.normal.x, facet.normal.y, facet.normal.z)
+				var normal = Vector3(facet.normal.x, facet.normal.y, facet.normal.z)
 				for vertex in [facet.vertices[0], facet.vertices[2], facet.vertices[1]]:
 					normals.append(normal)
 					verts.append(Vector3(vertex.x, vertex.y, vertex.z) * 39.3700787)
+			
+			var arr = []
+			arr.resize(Mesh.ARRAY_MAX)
+			
+			arr[Mesh.ARRAY_VERTEX] = verts
+			arr[Mesh.ARRAY_NORMAL] = normals
+			
+			$Faces.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+			$Faces.set_surface_material(face_index, face_material)
+			face_index += 1
 	
-	
-	
-	var arr = []
-	arr.resize(Mesh.ARRAY_MAX)
-	
-	arr[Mesh.ARRAY_VERTEX] = verts
-	arr[Mesh.ARRAY_NORMAL] = normals
-	
-	$Faces.mesh.clear_surfaces()
-	$Faces.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 
 
 func generate_cube():
