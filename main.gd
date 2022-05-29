@@ -7,11 +7,16 @@ var last_mouse_position = Vector2.ZERO
 
 
 func _ready():
-	generate_cube()
+	generate_bwh_edges()
+	generate_bwh_faces()
+#	generate_cube()
 #	generate_sphere()
 
 
 func _process(delta):
+	if Engine.is_editor_hint():
+		return
+	
 	var mouse_delta = get_viewport().get_mouse_position() - last_mouse_position
 	
 	if Input.is_action_pressed("rotate"):
@@ -21,7 +26,64 @@ func _process(delta):
 	last_mouse_position = get_viewport().get_mouse_position()
 
 
+func generate_bwh_edges():
+	var edge_verts = PoolVector3Array()
+	
+	var file = File.new()
+	file.open("res://data/bwh_edges.json", File.READ)
+	var edges = parse_json(file.get_as_text())
+	
+	for body in edges.bodies:
+		for edge in body.edges:
+			var last = null
+			for vertex in edge.vertices:
+				var next = Vector3(vertex.x, vertex.y, vertex.z) * 39.3700787
+				if last:
+					edge_verts.append(last)
+					edge_verts.append(next)
+				last = next
+	
+	var arr = []
+	arr.resize(Mesh.ARRAY_MAX)
+	arr[Mesh.ARRAY_VERTEX] = edge_verts
+	
+	$Faces.mesh.clear_surfaces()
+	$Edges.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, arr)
+
+
+func generate_bwh_faces():
+	var verts = PoolVector3Array()
+	var normals = PoolVector3Array()
+	var indices = PoolIntArray()
+	
+	
+	var file = File.new()
+	file.open("res://data/bwh_faces.json", File.READ)
+	var faces = parse_json(file.get_as_text())
+	
+	var i = 0
+	for body in faces.bodies:
+		for face in body.faces:
+			for facet in face.facets:
+				var normal = -Vector3(facet.normal.x, facet.normal.y, facet.normal.z)
+				for vertex in [facet.vertices[0], facet.vertices[2], facet.vertices[1]]:
+					normals.append(normal)
+					verts.append(Vector3(vertex.x, vertex.y, vertex.z) * 39.3700787)
+	
+	
+	
+	var arr = []
+	arr.resize(Mesh.ARRAY_MAX)
+	
+	arr[Mesh.ARRAY_VERTEX] = verts
+	arr[Mesh.ARRAY_NORMAL] = normals
+	
+	$Faces.mesh.clear_surfaces()
+	$Faces.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+
+
 func generate_cube():
+	return
 	var verts = PoolVector3Array()
 	
 	var p1 = Vector3(1, 1, 1)
