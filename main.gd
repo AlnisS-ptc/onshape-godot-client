@@ -48,7 +48,7 @@ func generate_edges(file_path):
 	$Edges.mesh.clear_surfaces()
 	$Edges.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, arr)
 
-
+# https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatedfaces?rollbackBarIndex=-1&outputFaceAppearances=false&outputVertexNormals=false&outputFacetNormals=true&outputTextureCoordinates=false&outputIndexTable=false&outputErrorFaces=false&combineCompositePartConstituents=false
 func generate_faces(file_path):
 	var file = File.new()
 	file.open(file_path, File.READ)
