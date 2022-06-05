@@ -24,6 +24,10 @@ config/name="Onshape Godot Client"
 run/main_scene="res://main.tscn"
 config/icon="res://icon.png"
 
+[autoload]
+
+Creds="*res://creds.gd"
+
 [display]
 
 window/vsync/use_vsync=false
@@ -39,10 +43,6 @@ rotate={
 "events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":2,"pressed":false,"doubleclick":false,"script":null)
  ]
 }
-
-[network]
-
-limits/debugger_stdout/max_chars_per_second=204800
 
 [physics]
 

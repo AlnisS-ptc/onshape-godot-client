@@ -12,3 +12,7 @@ build/
 lib/
 
 android/
+
+# API secrets
+creds.gd
+
