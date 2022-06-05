@@ -48,7 +48,7 @@ func generate_edges(file_path):
 	$Edges.mesh.clear_surfaces()
 	$Edges.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, arr)
 
-# https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatedfaces?rollbackBarIndex=-1&outputFaceAppearances=false&outputVertexNormals=false&outputFacetNormals=true&outputTextureCoordinates=false&outputIndexTable=false&outputErrorFaces=false&combineCompositePartConstituents=false
+
 func generate_faces(file_path):
 	var file = File.new()
 	file.open(file_path, File.READ)
@@ -56,39 +56,33 @@ func generate_faces(file_path):
 	
 	$Faces.mesh.clear_surfaces()
 	
+	var verts = PoolVector3Array()
+	var normals = PoolVector3Array()
+	var colors = PoolColorArray()
+	
 	var face_index = 0
 	for body in face_bodies:
 		for face in body.faces:
-			var verts = PoolVector3Array()
-			var normals = PoolVector3Array()
+			
+			var color_base64 = body.color
+			if "color" in face:
+				color_base64 = face.color
+			var cd = Marshalls.base64_to_raw(color_base64)
+			var color = Color8(cd[0], cd[1], cd[2], cd[3])
 			
 			for facet in face.facets:
 				var normal = Vector3(facet.normal[0], facet.normal[1], facet.normal[2])
 				for vertex in [facet.vertices[0], facet.vertices[2], facet.vertices[1]]:
 					normals.append(normal)
 					verts.append(Vector3(vertex[0], vertex[1], vertex[2]) * 39.3700787)
-			
-			var arr = []
-			arr.resize(Mesh.ARRAY_MAX)
-			arr[Mesh.ARRAY_VERTEX] = verts
-			arr[Mesh.ARRAY_NORMAL] = normals
-			
-			$Faces.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
-			
-			var color_base64 = body.color
-			if "color" in face:
-				color_base64 = face.color
-			
-			var mat = null
-			if color_base64 in materials:
-				mat = materials[color_base64]
-			else:
-				var cd = Marshalls.base64_to_raw(color_base64)
-				var color = Color8(cd[0], cd[1], cd[2], cd[3])
-				mat = face_material.duplicate()
-				mat.set_shader_param("modulate", color)
-				materials[color_base64] = mat
-			
-			$Faces.set_surface_material(face_index, mat)
+					colors.append(color)
 			
 			face_index += 1
+	
+	var arr = []
+	arr.resize(Mesh.ARRAY_MAX)
+	arr[Mesh.ARRAY_VERTEX] = verts
+	arr[Mesh.ARRAY_NORMAL] = normals
+	arr[Mesh.ARRAY_COLOR] = colors
+	
+	$Faces.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)

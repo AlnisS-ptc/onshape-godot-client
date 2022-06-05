@@ -24,6 +24,10 @@ config/name="Onshape Godot Client"
 run/main_scene="res://main.tscn"
 config/icon="res://icon.png"
 
+[display]
+
+window/vsync/use_vsync=false
+
 [gdnative]
 
 singletons=[ "res://addons/godot-git-plugin/git_api.gdnlib" ]

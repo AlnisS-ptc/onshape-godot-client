@@ -12,9 +12,6 @@ void fragment() {
 	matcap_normal = matcap_normal.x * TANGENT + matcap_normal.y * BINORMAL + matcap_normal.z * NORMAL;
 	
 	vec3 uv = matcap_normal.xyz * vec3(0.48, -0.48, 1.0) + 0.5;
-	
-	vec4 appearance = texture(matcap, uv.xy) * modulate;
-	
-	ALBEDO = appearance.rgb;
-//	ALPHA = appearance.a;
+
+	ALBEDO = texture(matcap, uv.xy).rgb * COLOR.rgb;
 }
