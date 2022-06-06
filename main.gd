@@ -1,5 +1,3 @@
-tool
-
 extends Spatial
 
 const ALPHANUMERIC_CHARACTERS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -11,6 +9,9 @@ var face_material = preload("res://materials/face_material.material")
 var last_mouse_position = Vector2.ZERO
 var materials := Dictionary()
 var crypto = Crypto.new()
+
+var edge_thread
+var face_thread
 
 func _ready():
 	randomize()
@@ -52,13 +53,20 @@ func onshape_request(http_request, url, method = HTTPClient.METHOD_GET,
 	if error != OK:
 		push_error("HTTP request error: %s" % error)
 
-func _face_request_completed(result, response_code, headers, body):
-	var response = parse_json(body.get_string_from_utf8())
-	generate_faces(response)
 
 func _edge_request_completed(result, response_code, headers, body):
-	var response = parse_json(body.get_string_from_utf8())
-	generate_edges(response)
+	edge_thread = Thread.new()
+	edge_thread.start(self, "generate_edges_from_response", body)
+
+func _face_request_completed(result, response_code, headers, body):
+	face_thread = Thread.new()
+	face_thread.start(self, "generate_faces_from_response", body)
+
+func generate_edges_from_response(body):
+	generate_edges(parse_json(body.get_string_from_utf8()))
+
+func generate_faces_from_response(body):
+	generate_faces(parse_json(body.get_string_from_utf8()))
 
 
 func create_signature(method, url, nonce, auth_date, content_type, access_key, secret_key):
