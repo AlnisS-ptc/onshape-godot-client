@@ -14,9 +14,8 @@ var crypto = Crypto.new()
 
 func _ready():
 	randomize()
-	generate_edges("res://data/camera_edges.json")
-	generate_faces("res://data/camera_faces.json")
-	onshape_request("https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatededges?rollbackBarIndex=-1")
+	onshape_request($EdgeHTTPRequest, "https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatededges?rollbackBarIndex=-1")
+	onshape_request($FaceHTTPRequest, "https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatedfaces?rollbackBarIndex=-1&outputFaceAppearances=true&outputVertexNormals=false&outputFacetNormals=true&outputTextureCoordinates=false&outputIndexTable=false&outputErrorFaces=false&combineCompositePartConstituents=false")
 
 
 func _process(delta):
@@ -32,7 +31,7 @@ func _process(delta):
 	last_mouse_position = get_viewport().get_mouse_position()
 
 
-func onshape_request(url, method = HTTPClient.METHOD_GET,
+func onshape_request(http_request, url, method = HTTPClient.METHOD_GET,
 		request_data = "", content_type = "application/json"):
 	var time = OS.get_datetime(true)
 	var date = "%s, %02d %s %d %02d:%02d:%02d GMT" % [WEEKDAYS[time.weekday], time.day,
@@ -43,7 +42,7 @@ func onshape_request(url, method = HTTPClient.METHOD_GET,
 	var signature = create_signature(HTTP_METHODS[method], url, nonce, date,
 			content_type, Creds.access_key, Creds.secret_key)
 	
-	var error = $HTTPRequest.request(url, [
+	var error = http_request.request(url, [
 		"Content-Type: " + content_type,
 		"Date: " + date,
 		"On-Nonce: " + nonce,
@@ -53,10 +52,13 @@ func onshape_request(url, method = HTTPClient.METHOD_GET,
 	if error != OK:
 		push_error("HTTP request error: %s" % error)
 
-
-func _http_request_completed(result, response_code, headers, body):
+func _face_request_completed(result, response_code, headers, body):
 	var response = parse_json(body.get_string_from_utf8())
-	print(response)
+	generate_faces(response)
+
+func _edge_request_completed(result, response_code, headers, body):
+	var response = parse_json(body.get_string_from_utf8())
+	generate_edges(response)
 
 
 func create_signature(method, url, nonce, auth_date, content_type, access_key, secret_key):
@@ -69,21 +71,16 @@ func create_signature(method, url, nonce, auth_date, content_type, access_key, s
 	var combined = ("%s\n%s\n%s\n%s\n%s\n%s\n" % [method, nonce, auth_date,
 			content_type, url_path, url_query]).to_lower()
 	
-#	var hmac = HMACSHA256.hmac_base64(combined.to_ascii(), secret_key.to_ascii())
 	var hmac = Marshalls.raw_to_base64(crypto.hmac_digest(
 			HashingContext.HASH_SHA256, secret_key.to_ascii(), combined.to_ascii()))
 	
 	return 'On %s:HmacSHA256:%s' % [access_key, hmac]
 
 # https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatededges?rollbackBarIndex=-1
-func generate_edges(file_path):
+func generate_edges(edge_json):
 	var edge_verts = PoolVector3Array()
 	
-	var file = File.new()
-	file.open(file_path, File.READ)
-	var edge_bodies = parse_json(file.get_as_text())
-	
-	for body in edge_bodies:
+	for body in edge_json:
 		for edge in body.edges:
 			var last = null
 			for vertex in edge.vertices:
@@ -100,12 +97,8 @@ func generate_edges(file_path):
 	$Edges.mesh.clear_surfaces()
 	$Edges.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, arr)
 
-# https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatedfaces?rollbackBarIndex=-1&outputFaceAppearances=false&outputVertexNormals=false&outputFacetNormals=true&outputTextureCoordinates=false&outputIndexTable=false&outputErrorFaces=false&combineCompositePartConstituents=false
-func generate_faces(file_path):
-	var file = File.new()
-	file.open(file_path, File.READ)
-	var face_bodies = parse_json(file.get_as_text())
-	
+# https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatedfaces?rollbackBarIndex=-1&outputFaceAppearances=true&outputVertexNormals=false&outputFacetNormals=true&outputTextureCoordinates=false&outputIndexTable=false&outputErrorFaces=false&combineCompositePartConstituents=false
+func generate_faces(face_json):
 	$Faces.mesh.clear_surfaces()
 	
 	var verts = PoolVector3Array()
@@ -113,7 +106,7 @@ func generate_faces(file_path):
 	var colors = PoolColorArray()
 	
 	var face_index = 0
-	for body in face_bodies:
+	for body in face_json:
 		for face in body.faces:
 			
 			var color_base64 = body.color
