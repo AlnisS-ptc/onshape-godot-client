@@ -16,7 +16,7 @@ var face_thread
 func _ready():
 	randomize()
 	onshape_request($EdgeHTTPRequest, "https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatededges?rollbackBarIndex=-1")
-	onshape_request($FaceHTTPRequest, "https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatedfaces?rollbackBarIndex=-1&outputFaceAppearances=true&outputVertexNormals=false&outputFacetNormals=true&outputTextureCoordinates=false&outputIndexTable=false&outputErrorFaces=false&combineCompositePartConstituents=false")
+	onshape_request($FaceHTTPRequest, "https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatedfaces?rollbackBarIndex=-1&outputFaceAppearances=true&outputVertexNormals=true&outputFacetNormals=false&outputTextureCoordinates=false&outputIndexTable=false&outputErrorFaces=false&combineCompositePartConstituents=false")
 
 
 func _process(delta):
@@ -84,7 +84,7 @@ func create_signature(method, url, nonce, auth_date, content_type, access_key, s
 	
 	return 'On %s:HmacSHA256:%s' % [access_key, hmac]
 
-# https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatededges?rollbackBarIndex=-1
+# Generates edge mesh from JSON dictionary and puts it in $Edges
 func generate_edges(edge_json):
 	var edge_verts = PoolVector3Array()
 	
@@ -105,7 +105,7 @@ func generate_edges(edge_json):
 	$Edges.mesh.clear_surfaces()
 	$Edges.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, arr)
 
-# https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatedfaces?rollbackBarIndex=-1&outputFaceAppearances=true&outputVertexNormals=false&outputFacetNormals=true&outputTextureCoordinates=false&outputIndexTable=false&outputErrorFaces=false&combineCompositePartConstituents=false
+# Generates face mesh from JSON dictionary and puts it in $Faces
 func generate_faces(face_json):
 	$Faces.mesh.clear_surfaces()
 	
@@ -124,9 +124,10 @@ func generate_faces(face_json):
 			var color = Color8(cd[0], cd[1], cd[2], cd[3])
 			
 			for facet in face.facets:
-				var normal = Vector3(facet.normal[0], facet.normal[1], facet.normal[2])
-				for vertex in [facet.vertices[0], facet.vertices[2], facet.vertices[1]]:
-					normals.append(normal)
+				for i in [0, 2, 1]:
+					var vertex = facet.vertices[i]
+					var n = facet.vertexNormals[i]
+					normals.append(Vector3(n[0], n[1], n[2]))
 					verts.append(Vector3(vertex[0], vertex[1], vertex[2]) * 39.3700787)
 					colors.append(color)
 			
