@@ -15,8 +15,7 @@ var face_thread
 
 func _ready():
 	randomize()
-	onshape_request($EdgeHTTPRequest, "https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatededges?rollbackBarIndex=-1")
-	onshape_request($FaceHTTPRequest, "https://cad.onshape.com/api/partstudios/d/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0/tessellatedfaces?rollbackBarIndex=-1&outputFaceAppearances=true&outputVertexNormals=true&outputFacetNormals=false&outputTextureCoordinates=false&outputIndexTable=false&outputErrorFaces=false&combineCompositePartConstituents=false")
+	_on_LoadButton_pressed()
 
 
 func _process(delta):
@@ -29,7 +28,23 @@ func _process(delta):
 		$CameraBase.rotate($CameraBase/Camera.get_global_transform().basis.y, mouse_delta.x * -0.01)
 		$CameraBase.rotate($CameraBase/Camera.get_global_transform().basis.x, mouse_delta.y * -0.01)
 	
+	if Input.is_action_pressed("pan"):
+		$CameraBase.global_translate($CameraBase/Camera.get_global_transform().basis.y * mouse_delta.y * 0.005)
+		$CameraBase.global_translate($CameraBase/Camera.get_global_transform().basis.x * mouse_delta.x * -0.005)
+	
 	last_mouse_position = get_viewport().get_mouse_position()
+
+
+func load_edges(did, wvm, wvmid, eid):
+	onshape_request($EdgeHTTPRequest,
+			"https://cad.onshape.com/api/partstudios/d/%s/%s/%s/e/%s/tessellatededges?rollbackBarIndex=-1" %
+			[did, wvm, wvmid, eid])
+
+
+func load_faces(did, wvm, wvmid, eid):
+	onshape_request($FaceHTTPRequest,
+			"https://cad.onshape.com/api/partstudios/d/%s/%s/%s/e/%s/tessellatedfaces?rollbackBarIndex=-1&outputFaceAppearances=true&outputVertexNormals=true&outputFacetNormals=false&outputTextureCoordinates=false&outputIndexTable=false&outputErrorFaces=false&combineCompositePartConstituents=false" %
+			[did, wvm, wvmid, eid])
 
 
 func onshape_request(http_request, url, method = HTTPClient.METHOD_GET,
@@ -140,3 +155,21 @@ func generate_faces(face_json):
 	arr[Mesh.ARRAY_COLOR] = colors
 	
 	$Faces.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+
+
+func _on_LoadButton_pressed():
+	var text = $TopBar/HBoxContainer/URLLineEdit.text
+#	var did = "bd3e28cca10081e0a5ad3ef8"
+#	var wvm = "w"
+#	var wvmid = "f254fe7c4889c85a6841547f"
+#	var eid = "f73186e750b795fdac6fbae0"
+	var did = text.substr(text.find("/documents/") + 11, 24)
+	var wvm = "w"
+	var wvmid = text.substr(text.find("/w/") + 3, 24)
+	var eid = text.substr(text.find("/e/") + 3, 24)
+	print(did)
+	print(wvm)
+	print(wvmid)
+	print(eid)
+	load_edges(did, wvm, wvmid, eid)
+	load_faces(did, wvm, wvmid, eid)

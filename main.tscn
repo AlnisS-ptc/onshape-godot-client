@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://main.gd" type="Script" id=1]
 [ext_resource path="res://materials/face_material.material" type="Material" id=2]
 [ext_resource path="res://materials/edge_material.material" type="Material" id=3]
+[ext_resource path="res://ui/logo-onshape-gray-green.svg" type="Texture" id=4]
 
 [sub_resource type="ArrayMesh" id=5]
 
@@ -10,6 +11,18 @@
 
 [sub_resource type="SphereMesh" id=4]
 material = ExtResource( 2 )
+
+[sub_resource type="StyleBoxFlat" id=7]
+bg_color = Color( 1, 1, 1, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.603922, 0.647059, 0.686275, 1 )
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [node name="Main" type="Spatial"]
 script = ExtResource( 1 )
@@ -54,5 +67,71 @@ light_specular = 16.0
 
 [node name="EdgeHTTPRequest" type="HTTPRequest" parent="."]
 
+[node name="TopBar" type="ColorRect" parent="."]
+anchor_right = 1.0
+margin_bottom = 40.0
+color = Color( 0.972549, 0.972549, 0.972549, 1 )
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TopBar"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="MarginContainer" type="MarginContainer" parent="TopBar/HBoxContainer"]
+margin_right = 5.0
+margin_bottom = 40.0
+rect_min_size = Vector2( 5, 0 )
+
+[node name="TextureRect" type="TextureRect" parent="TopBar/HBoxContainer"]
+margin_left = 9.0
+margin_right = 101.506
+margin_bottom = 40.0
+rect_min_size = Vector2( 92.506, 40 )
+texture = ExtResource( 4 )
+expand = true
+stretch_mode = 6
+
+[node name="MarginContainer2" type="MarginContainer" parent="TopBar/HBoxContainer"]
+margin_left = 105.0
+margin_right = 110.0
+margin_bottom = 40.0
+rect_min_size = Vector2( 5, 0 )
+
+[node name="URLLineEdit" type="LineEdit" parent="TopBar/HBoxContainer"]
+margin_left = 114.0
+margin_top = 5.0
+margin_right = 969.0
+margin_bottom = 35.0
+rect_min_size = Vector2( 0, 30 )
+size_flags_horizontal = 3
+size_flags_vertical = 4
+custom_colors/selection_color = Color( 0.0470588, 0.686275, 1, 1 )
+custom_colors/cursor_color = Color( 0, 0, 0, 1 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_styles/normal = SubResource( 7 )
+text = "https://cad.onshape.com/documents/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0"
+placeholder_text = "Enter Part Studio URL"
+placeholder_alpha = 0.5
+
+[node name="MarginContainer4" type="MarginContainer" parent="TopBar/HBoxContainer"]
+margin_left = 973.0
+margin_right = 973.0
+margin_bottom = 40.0
+
+[node name="LoadButton" type="Button" parent="TopBar/HBoxContainer"]
+margin_left = 977.0
+margin_top = 5.0
+margin_right = 1019.0
+margin_bottom = 35.0
+rect_min_size = Vector2( 0, 30 )
+size_flags_vertical = 4
+text = "Load"
+
+[node name="MarginContainer3" type="MarginContainer" parent="TopBar/HBoxContainer"]
+margin_left = 1023.0
+margin_right = 1024.0
+margin_bottom = 40.0
+rect_min_size = Vector2( 1, 0 )
+
 [connection signal="request_completed" from="FaceHTTPRequest" to="." method="_face_request_completed"]
 [connection signal="request_completed" from="EdgeHTTPRequest" to="." method="_edge_request_completed"]
+[connection signal="pressed" from="TopBar/HBoxContainer/LoadButton" to="." method="_on_LoadButton_pressed"]
