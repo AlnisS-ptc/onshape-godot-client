@@ -1,4 +1,4 @@
-extends Spatial
+extends Node3D
 
 const ALPHANUMERIC_CHARACTERS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -22,34 +22,38 @@ func _process(delta):
 	if Engine.is_editor_hint():
 		return
 	
+#	print(Engine.get_frames_per_second())
+	
 	var mouse_delta = get_viewport().get_mouse_position() - last_mouse_position
 	
 	if Input.is_action_pressed("rotate"):
-		$CameraBase.rotate($CameraBase/Camera.get_global_transform().basis.y, mouse_delta.x * -0.01)
-		$CameraBase.rotate($CameraBase/Camera.get_global_transform().basis.x, mouse_delta.y * -0.01)
+		$CameraBase.rotate($CameraBase/Camera3D.get_global_transform().basis.y, mouse_delta.x * -0.01)
+		$CameraBase.rotate($CameraBase/Camera3D.get_global_transform().basis.x, mouse_delta.y * -0.01)
 	
 	if Input.is_action_pressed("pan"):
-		$CameraBase.global_translate($CameraBase/Camera.get_global_transform().basis.y * mouse_delta.y * 0.005)
-		$CameraBase.global_translate($CameraBase/Camera.get_global_transform().basis.x * mouse_delta.x * -0.005)
+		$CameraBase.global_translate($CameraBase/Camera3D.get_global_transform().basis.y * mouse_delta.y * 0.005)
+		$CameraBase.global_translate($CameraBase/Camera3D.get_global_transform().basis.x * mouse_delta.x * -0.005)
 	
 	last_mouse_position = get_viewport().get_mouse_position()
 
 
 func load_edges(did, wvm, wvmid, eid):
+	print("loading edges")
 	onshape_request($EdgeHTTPRequest,
 			"https://cad.onshape.com/api/partstudios/d/%s/%s/%s/e/%s/tessellatededges?rollbackBarIndex=-1" %
 			[did, wvm, wvmid, eid])
 
 
 func load_faces(did, wvm, wvmid, eid):
+	print("loading faces")
 	onshape_request($FaceHTTPRequest,
 			"https://cad.onshape.com/api/partstudios/d/%s/%s/%s/e/%s/tessellatedfaces?rollbackBarIndex=-1&outputFaceAppearances=true&outputVertexNormals=true&outputFacetNormals=false&outputTextureCoordinates=false&outputIndexTable=false&outputErrorFaces=false&combineCompositePartConstituents=false" %
 			[did, wvm, wvmid, eid])
 
 
-func onshape_request(http_request, url, method = HTTPClient.METHOD_GET,
+func onshape_request(http_request: HTTPRequest, url, method = HTTPClient.METHOD_GET,
 		request_data = "", content_type = "application/json"):
-	var time = OS.get_datetime(true)
+	var time = Time.get_datetime_dict_from_system(true)
 	var date = "%s, %02d %s %d %02d:%02d:%02d GMT" % [WEEKDAYS[time.weekday], time.day,
 			MONTHS[time.month-1], time.year, time.hour, time.minute, time.second]
 
@@ -63,25 +67,31 @@ func onshape_request(http_request, url, method = HTTPClient.METHOD_GET,
 		"Date: " + date,
 		"On-Nonce: " + nonce,
 		"Authorization: " + signature
-	], true, method, request_data)
+	], method, request_data)
 	
 	if error != OK:
 		push_error("HTTP request error: %s" % error)
 
 
 func _edge_request_completed(result, response_code, headers, body):
+	print("edges received")
 	edge_thread = Thread.new()
-	edge_thread.start(self, "generate_edges_from_response", body)
+	edge_thread.start(Callable(self,"generate_edges_from_response").bind(body))
 
 func _face_request_completed(result, response_code, headers, body):
+	print("faces received")
 	face_thread = Thread.new()
-	face_thread.start(self, "generate_faces_from_response", body)
+	face_thread.start(Callable(self,"generate_faces_from_response").bind(body))
 
 func generate_edges_from_response(body):
-	generate_edges(parse_json(body.get_string_from_utf8()))
+	var test_json_conv = JSON.new()
+	test_json_conv.parse(body.get_string_from_utf8())
+	generate_edges(test_json_conv.get_data())
 
 func generate_faces_from_response(body):
-	generate_faces(parse_json(body.get_string_from_utf8()))
+	var test_json_conv = JSON.new()
+	test_json_conv.parse(body.get_string_from_utf8())
+	generate_faces(test_json_conv.get_data())
 
 
 func create_signature(method, url, nonce, auth_date, content_type, access_key, secret_key):
@@ -95,13 +105,14 @@ func create_signature(method, url, nonce, auth_date, content_type, access_key, s
 			content_type, url_path, url_query]).to_lower()
 	
 	var hmac = Marshalls.raw_to_base64(crypto.hmac_digest(
-			HashingContext.HASH_SHA256, secret_key.to_ascii(), combined.to_ascii()))
+			HashingContext.HASH_SHA256, secret_key.to_ascii_buffer(), combined.to_ascii_buffer()))
 	
 	return 'On %s:HmacSHA256:%s' % [access_key, hmac]
 
 # Generates edge mesh from JSON dictionary and puts it in $Edges
 func generate_edges(edge_json):
-	var edge_verts = PoolVector3Array()
+	print("generating edges")
+	var edge_verts = PackedVector3Array()
 	
 	for body in edge_json:
 		for edge in body.edges:
@@ -119,14 +130,17 @@ func generate_edges(edge_json):
 	
 	$Edges.mesh.clear_surfaces()
 	$Edges.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, arr)
+	
+	print("finished generating edges")
+#	print(edge_verts)
 
 # Generates face mesh from JSON dictionary and puts it in $Faces
 func generate_faces(face_json):
 	$Faces.mesh.clear_surfaces()
 	
-	var verts = PoolVector3Array()
-	var normals = PoolVector3Array()
-	var colors = PoolColorArray()
+	var verts = PackedVector3Array()
+	var normals = PackedVector3Array()
+	var colors = PackedColorArray()
 	
 	var face_index = 0
 	for body in face_json:

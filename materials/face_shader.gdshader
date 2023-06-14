@@ -2,12 +2,12 @@ shader_type spatial;
 
 render_mode unshaded;
 
-uniform vec4 modulate : hint_color = vec4(0.6157, 0.8118, 0.9294, 1.0);
-uniform sampler2D matcap : hint_white;
+uniform vec4 modulate : source_color = vec4(0.6157, 0.8118, 0.9294, 1.0);
+uniform sampler2D matcap : hint_default_white;
 
 
 void fragment() {
-	vec3 matcap_normal = vec3(NORMALMAP.xy * 2.0 - 1.0, 1.0) * NORMALMAP_DEPTH;
+	vec3 matcap_normal = vec3(NORMAL_MAP.xy * 2.0 - 1.0, 1.0) * NORMAL_MAP_DEPTH;
 	matcap_normal.z = 1.0 - (pow(matcap_normal.x, 2.0) + pow(matcap_normal.y, 2.0));
 	matcap_normal = matcap_normal.x * TANGENT + matcap_normal.y * BINORMAL + matcap_normal.z * NORMAL;
 	

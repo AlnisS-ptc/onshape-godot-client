@@ -1,136 +1,132 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=11 format=3 uid="uid://dg5wks2g45tl6"]
 
-[ext_resource path="res://main.gd" type="Script" id=1]
-[ext_resource path="res://materials/face_material.material" type="Material" id=2]
-[ext_resource path="res://materials/edge_material.material" type="Material" id=3]
-[ext_resource path="res://ui/logo-onshape-gray-green.svg" type="Texture" id=4]
+[ext_resource type="Script" path="res://main.gd" id="1"]
+[ext_resource type="Material" path="res://materials/face_material.material" id="2"]
+[ext_resource type="Material" path="res://materials/edge_material.material" id="3"]
+[ext_resource type="Texture2D" uid="uid://drk5oo1ryk4a8" path="res://ui/logo-onshape-gray-green.svg" id="4"]
+[ext_resource type="Environment" uid="uid://dnf42v2jng1m5" path="res://default_env.tres" id="4_7eb3i"]
 
-[sub_resource type="ArrayMesh" id=5]
+[sub_resource type="ArrayMesh" id="5"]
 
-[sub_resource type="ArrayMesh" id=6]
+[sub_resource type="ArrayMesh" id="6"]
 
-[sub_resource type="SphereMesh" id=4]
-material = ExtResource( 2 )
+[sub_resource type="SphereMesh" id="4"]
+material = ExtResource("2")
 
-[sub_resource type="StyleBoxFlat" id=7]
-bg_color = Color( 1, 1, 1, 1 )
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rxva2"]
+bg_color = Color(1, 1, 1, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color( 0.603922, 0.647059, 0.686275, 1 )
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
-[node name="Main" type="Spatial"]
-script = ExtResource( 1 )
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_amky7"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
-[node name="Faces" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
-material_override = ExtResource( 2 )
-mesh = SubResource( 5 )
+[node name="Main" type="Node3D"]
+script = ExtResource("1")
 
-[node name="Edges" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
+[node name="Faces" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+material_override = ExtResource("2")
+mesh = SubResource("5")
+
+[node name="Edges" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
 layers = 2
-material_override = ExtResource( 3 )
-mesh = SubResource( 6 )
+material_override = ExtResource("3")
+mesh = SubResource("6")
 
-[node name="Sphere" type="MeshInstance" parent="."]
+[node name="Sphere" type="MeshInstance3D" parent="."]
 visible = false
-material_override = ExtResource( 2 )
-mesh = SubResource( 4 )
-material/0 = null
+material_override = ExtResource("2")
+mesh = SubResource("4")
 
-[node name="CameraBase" type="Spatial" parent="."]
+[node name="CameraBase" type="Node3D" parent="."]
 
-[node name="Camera" type="Camera" parent="CameraBase"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6 )
+[node name="Camera3D" type="Camera3D" parent="CameraBase"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+environment = ExtResource("4_7eb3i")
 fov = 45.0
 size = 4.0
 
-[node name="Diffuse" type="DirectionalLight" parent="CameraBase"]
-transform = Transform( 0.65914, -0.549642, 0.513252, 0.114828, 0.748056, 0.653626, -0.743202, -0.371895, 0.556188, 0, 0, 0 )
+[node name="Diffuse" type="DirectionalLight3D" parent="CameraBase"]
+transform = Transform3D(0.65914, -0.549642, 0.513252, 0.114828, 0.748056, 0.653626, -0.743202, -0.371895, 0.556188, 0, 0, 0)
 visible = false
 light_energy = 0.35
-light_specular = 0.0
 
-[node name="Highlight" type="DirectionalLight" parent="CameraBase"]
-transform = Transform( 0.761232, -0.549642, 0.344122, 0.265102, 0.748056, 0.608386, -0.591817, -0.371896, 0.715155, 0, 0, 0 )
+[node name="Highlight" type="DirectionalLight3D" parent="CameraBase"]
+transform = Transform3D(0.761232, -0.549642, 0.344122, 0.265102, 0.748056, 0.608386, -0.591817, -0.371896, 0.715155, 0, 0, 0)
 visible = false
 light_energy = 0.05
-light_specular = 16.0
 
 [node name="FaceHTTPRequest" type="HTTPRequest" parent="."]
 
 [node name="EdgeHTTPRequest" type="HTTPRequest" parent="."]
 
 [node name="TopBar" type="ColorRect" parent="."]
+anchors_preset = 10
 anchor_right = 1.0
-margin_bottom = 40.0
-color = Color( 0.972549, 0.972549, 0.972549, 1 )
+offset_bottom = 40.0
+color = Color(0.972549, 0.972549, 0.972549, 1)
 
 [node name="HBoxContainer" type="HBoxContainer" parent="TopBar"]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 
 [node name="MarginContainer" type="MarginContainer" parent="TopBar/HBoxContainer"]
-margin_right = 5.0
-margin_bottom = 40.0
-rect_min_size = Vector2( 5, 0 )
+custom_minimum_size = Vector2(5, 0)
+layout_mode = 2
 
 [node name="TextureRect" type="TextureRect" parent="TopBar/HBoxContainer"]
-margin_left = 9.0
-margin_right = 101.506
-margin_bottom = 40.0
-rect_min_size = Vector2( 92.506, 40 )
-texture = ExtResource( 4 )
-expand = true
-stretch_mode = 6
+custom_minimum_size = Vector2(140, 40)
+layout_mode = 2
+texture = ExtResource("4")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="MarginContainer2" type="MarginContainer" parent="TopBar/HBoxContainer"]
-margin_left = 105.0
-margin_right = 110.0
-margin_bottom = 40.0
-rect_min_size = Vector2( 5, 0 )
+custom_minimum_size = Vector2(5, 0)
+layout_mode = 2
 
 [node name="URLLineEdit" type="LineEdit" parent="TopBar/HBoxContainer"]
-margin_left = 114.0
-margin_top = 5.0
-margin_right = 969.0
-margin_bottom = 35.0
-rect_min_size = Vector2( 0, 30 )
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
-custom_colors/selection_color = Color( 0.0470588, 0.686275, 1, 1 )
-custom_colors/cursor_color = Color( 0, 0, 0, 1 )
-custom_colors/font_color = Color( 0, 0, 0, 1 )
-custom_styles/normal = SubResource( 7 )
+theme_override_colors/font_color = Color(0.2, 0.2, 0.2, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_rxva2")
 text = "https://cad.onshape.com/documents/bd3e28cca10081e0a5ad3ef8/w/f254fe7c4889c85a6841547f/e/f73186e750b795fdac6fbae0"
 placeholder_text = "Enter Part Studio URL"
-placeholder_alpha = 0.5
 
 [node name="MarginContainer4" type="MarginContainer" parent="TopBar/HBoxContainer"]
-margin_left = 973.0
-margin_right = 973.0
-margin_bottom = 40.0
+layout_mode = 2
 
 [node name="LoadButton" type="Button" parent="TopBar/HBoxContainer"]
-margin_left = 977.0
-margin_top = 5.0
-margin_right = 1019.0
-margin_bottom = 35.0
-rect_min_size = Vector2( 0, 30 )
+custom_minimum_size = Vector2(50, 30)
+layout_mode = 2
 size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.2, 0.2, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_amky7")
 text = "Load"
 
 [node name="MarginContainer3" type="MarginContainer" parent="TopBar/HBoxContainer"]
-margin_left = 1023.0
-margin_right = 1024.0
-margin_bottom = 40.0
-rect_min_size = Vector2( 1, 0 )
+custom_minimum_size = Vector2(1, 0)
+layout_mode = 2
 
 [connection signal="request_completed" from="FaceHTTPRequest" to="." method="_face_request_completed"]
 [connection signal="request_completed" from="EdgeHTTPRequest" to="." method="_edge_request_completed"]
