@@ -45,13 +45,15 @@ void fragment() {
 //	float val = ratio;
 //	ALBEDO = vec3(1.0 + val, 1.0 - abs(val), 1.0 - val);
 	
-	ALBEDO = vec3(ratio * 40.0);
+//	ALBEDO = vec3(ratio * 40.0);
+	ALBEDO = vec3(0.0);
 	if (ratio < cutoff_ratio) {
+		ALPHA = 0.2;
 //		ALBEDO = vec3(0.8, 0.0, 0.0);
-////		ALBEDO = vec3(1.0);
-		discard;
+//		ALBEDO = vec3(0.8);
+//		discard;
 	} else {
-		ALBEDO = vec3(0.0);
+//		ALBEDO = vec3(0.0);
 //		ALPHA = clamp((ratio - 0.995) / 0.002, 0.0, 1.0);
 //		ALBEDO = vec3(0.0);
 	}
