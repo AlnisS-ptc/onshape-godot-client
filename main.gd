@@ -195,3 +195,9 @@ func _on_LoadButton_pressed():
 
 func _on_documents_http_request_request_completed(result, response_code, headers, body):
 	print(result, response_code, headers, body)
+
+
+func _on_test_slider_value_changed(value):
+	pass
+#	print(value)
+#	($Edges.material_override as ShaderMaterial).set_shader_parameter("cutoff_ratio", value)

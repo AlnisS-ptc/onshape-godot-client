@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://main.gd" id="1"]
 [ext_resource type="Material" path="res://materials/face_material.material" id="2"]
-[ext_resource type="Material" path="res://materials/edge_material.material" id="3"]
+[ext_resource type="Material" uid="uid://7ec7yphpjrws" path="res://materials/edge_material.material" id="3"]
 [ext_resource type="Texture2D" uid="uid://drk5oo1ryk4a8" path="res://ui/logo-onshape-gray-green.svg" id="4"]
 [ext_resource type="Environment" uid="uid://dnf42v2jng1m5" path="res://default_env.tres" id="4_7eb3i"]
 
@@ -130,7 +130,19 @@ text = "Load"
 custom_minimum_size = Vector2(1, 0)
 layout_mode = 2
 
+[node name="TestSlider" type="HSlider" parent="."]
+visible = false
+offset_left = 17.0
+offset_top = 57.0
+offset_right = 759.0
+offset_bottom = 93.0
+min_value = 0.995
+max_value = 1.0
+step = 0.0
+value = 0.995
+
 [connection signal="request_completed" from="FaceHTTPRequest" to="." method="_face_request_completed"]
 [connection signal="request_completed" from="EdgeHTTPRequest" to="." method="_edge_request_completed"]
 [connection signal="request_completed" from="DocumentsHTTPRequest" to="." method="_on_documents_http_request_request_completed"]
 [connection signal="pressed" from="TopBar/HBoxContainer/LoadButton" to="." method="_on_LoadButton_pressed"]
+[connection signal="value_changed" from="TestSlider" to="." method="_on_test_slider_value_changed"]
