@@ -3,7 +3,7 @@ shader_type spatial;
 render_mode unshaded;
 
 uniform vec4 modulate : source_color = vec4(0.6157, 0.8118, 0.9294, 1.0);
-uniform sampler2D matcap : hint_default_white;
+uniform sampler2D matcap : source_color, hint_default_white;
 
 
 void fragment() {
