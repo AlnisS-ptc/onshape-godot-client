@@ -1,8 +1,9 @@
-[gd_scene load_steps=11 format=3 uid="uid://dg5wks2g45tl6"]
+[gd_scene load_steps=12 format=3 uid="uid://dg5wks2g45tl6"]
 
 [ext_resource type="Script" path="res://main.gd" id="1"]
 [ext_resource type="Material" path="res://materials/face_material.material" id="2"]
 [ext_resource type="Material" uid="uid://7ec7yphpjrws" path="res://materials/edge_material.material" id="3"]
+[ext_resource type="Material" uid="uid://8okoi71hclit" path="res://materials/edge_all_material.material" id="3_t7qoc"]
 [ext_resource type="Texture2D" uid="uid://drk5oo1ryk4a8" path="res://ui/logo-onshape-gray-green.svg" id="4"]
 [ext_resource type="Environment" uid="uid://dnf42v2jng1m5" path="res://default_env.tres" id="4_7eb3i"]
 
@@ -43,7 +44,14 @@ transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 
 material_override = ExtResource("2")
 mesh = SubResource("5")
 
-[node name="Edges" type="MeshInstance3D" parent="."]
+[node name="EdgesAll" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+visible = false
+layers = 2
+material_override = ExtResource("3_t7qoc")
+mesh = SubResource("6")
+
+[node name="EdgesFiltered" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
 layers = 2
 material_override = ExtResource("3")
@@ -151,7 +159,7 @@ theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
 theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
 theme_override_colors/font_disabled_color = Color(0, 0, 0, 1)
 text = "Render mode"
-item_count = 6
+item_count = 5
 popup/item_0/text = "Shaded"
 popup/item_0/id = 0
 popup/item_1/text = "Shaded without edges"
@@ -162,8 +170,6 @@ popup/item_3/text = "Hidden edges removed"
 popup/item_3/id = 3
 popup/item_4/text = "Hidden edges visible"
 popup/item_4/id = 4
-popup/item_5/text = "Translucent"
-popup/item_5/id = 5
 
 [connection signal="request_completed" from="FaceHTTPRequest" to="." method="_face_request_completed"]
 [connection signal="request_completed" from="EdgeHTTPRequest" to="." method="_edge_request_completed"]

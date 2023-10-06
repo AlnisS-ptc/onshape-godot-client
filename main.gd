@@ -14,8 +14,10 @@ enum RenderMode {
 	TRANSLUCENT,
 }
 
-@onready var faces_node = $Faces
-@onready var edges_node = $Edges
+@onready var faces_node := $Faces
+@onready var faces_material: ShaderMaterial = faces_node.material_override
+@onready var edges_all_node := $EdgesAll
+@onready var edges_all_material: ShaderMaterial = edges_all_node.material_override
 @onready var render_mode_popup: PopupMenu = $MenuButton.get_popup()
 
 var face_material = preload("res://materials/face_material.material")
@@ -53,19 +55,38 @@ func _process(delta):
 
 
 func set_render_mode(mode: int):
+	faces_material.set_shader_parameter("use_matcap", true)
+	$EdgesAll.hide()
+	$EdgesFiltered.show()
+	var use_matcap = true
+	var use_color = true
+	var show_hidden_edges = false
+	var fade_hidden_edges = false
+	
 	match mode:
 		RenderMode.SHADED:
 			print("shaded")
+			
 		RenderMode.SHADED_WITHOUT_EDGES:
 			print("shaded without edges")
+			$EdgesFiltered.hide()
+			
 		RenderMode.SHADED_WITH_HIDDEN_EDGES:
 			print("shaded with hidden edges")
+			$EdgesAll.show()
+			
 		RenderMode.HIDDEN_EDGES_REMOVED:
 			print("hidden edges removed")
+			faces_material.set_shader_parameter("use_matcap", false)
+			
 		RenderMode.HIDDEN_EDGES_VISIBLE:
 			print("hidden edges visible")
+			faces_material.set_shader_parameter("use_matcap", false)
+			$EdgesAll.show()
+			
 		RenderMode.TRANSLUCENT:
 			print("translucent")
+			push_warning("translucent render mode not implemented")
 
 
 func load_edges(did, wvm, wvmid, eid):
@@ -160,8 +181,9 @@ func generate_edges(edge_json):
 	arr.resize(Mesh.ARRAY_MAX)
 	arr[Mesh.ARRAY_VERTEX] = edge_verts
 	
-	edges_node.mesh.clear_surfaces()
-	edges_node.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, arr)
+	# note: since EdgesAll and EdgesFiltered share mesh data, setting it for one sets it for the other
+	edges_all_node.mesh.clear_surfaces()
+	edges_all_node.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, arr)
 	
 	print("finished generating edges")
 #	print(edge_verts)
@@ -222,7 +244,8 @@ func _on_LoadButton_pressed():
 
 
 func _on_documents_http_request_request_completed(result, response_code, headers, body):
-	print(result, response_code, headers, body)
+	pass
+#	print(result, response_code, headers, body)
 
 
 func _on_test_slider_value_changed(value):
