@@ -5,8 +5,18 @@ const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "CONNECT", "PATCH"]
 
+enum RenderMode {
+	SHADED,
+	SHADED_WITHOUT_EDGES,
+	SHADED_WITH_HIDDEN_EDGES,
+	HIDDEN_EDGES_REMOVED,
+	HIDDEN_EDGES_VISIBLE,
+	TRANSLUCENT,
+}
+
 @onready var faces_node = $Faces
 @onready var edges_node = $Edges
+@onready var render_mode_popup: PopupMenu = $MenuButton.get_popup()
 
 var face_material = preload("res://materials/face_material.material")
 var last_mouse_position = Vector2.ZERO
@@ -19,6 +29,8 @@ var face_thread
 func _ready():
 	randomize()
 	_on_LoadButton_pressed()
+	
+	render_mode_popup.connect("id_pressed", set_render_mode)
 
 
 func _process(delta):
@@ -38,6 +50,22 @@ func _process(delta):
 		$CameraBase.global_translate($CameraBase/Camera3D.get_global_transform().basis.x * mouse_delta.x * -0.005)
 	
 	last_mouse_position = get_viewport().get_mouse_position()
+
+
+func set_render_mode(mode: int):
+	match mode:
+		RenderMode.SHADED:
+			print("shaded")
+		RenderMode.SHADED_WITHOUT_EDGES:
+			print("shaded without edges")
+		RenderMode.SHADED_WITH_HIDDEN_EDGES:
+			print("shaded with hidden edges")
+		RenderMode.HIDDEN_EDGES_REMOVED:
+			print("hidden edges removed")
+		RenderMode.HIDDEN_EDGES_VISIBLE:
+			print("hidden edges visible")
+		RenderMode.TRANSLUCENT:
+			print("translucent")
 
 
 func load_edges(did, wvm, wvmid, eid):
