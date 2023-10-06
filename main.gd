@@ -5,6 +5,9 @@ const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 const HTTP_METHODS = ["GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "TRACE", "CONNECT", "PATCH"]
 
+@onready var faces_node = $Faces
+@onready var edges_node = $Edges
+
 var face_material = preload("res://materials/face_material.material")
 var last_mouse_position = Vector2.ZERO
 var materials := Dictionary()
@@ -49,6 +52,7 @@ func load_faces(did, wvm, wvmid, eid):
 	onshape_request($FaceHTTPRequest,
 			"https://cad.onshape.com/api/partstudios/d/%s/%s/%s/e/%s/tessellatedfaces?rollbackBarIndex=-1&outputFaceAppearances=true&outputVertexNormals=true&outputFacetNormals=false&outputTextureCoordinates=false&outputIndexTable=false&outputErrorFaces=false&combineCompositePartConstituents=false" %
 			[did, wvm, wvmid, eid])
+	onshape_request($DocumentsHTTPRequest, 'https://cad.onshape.com/api/v6/documents?ownerType=1&sortColumn=createdAt&sortOrder=desc&offset=0&limit=20')
 
 
 func onshape_request(http_request: HTTPRequest, url, method = HTTPClient.METHOD_GET,
@@ -109,7 +113,7 @@ func create_signature(method, url, nonce, auth_date, content_type, access_key, s
 	
 	return 'On %s:HmacSHA256:%s' % [access_key, hmac]
 
-# Generates edge mesh from JSON dictionary and puts it in $Edges
+# Generates edge mesh from JSON dictionary and puts it in edges_node
 func generate_edges(edge_json):
 	print("generating edges")
 	var edge_verts = PackedVector3Array()
@@ -128,15 +132,15 @@ func generate_edges(edge_json):
 	arr.resize(Mesh.ARRAY_MAX)
 	arr[Mesh.ARRAY_VERTEX] = edge_verts
 	
-	$Edges.mesh.clear_surfaces()
-	$Edges.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, arr)
+	edges_node.mesh.clear_surfaces()
+	edges_node.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_LINES, arr)
 	
 	print("finished generating edges")
 #	print(edge_verts)
 
-# Generates face mesh from JSON dictionary and puts it in $Faces
+# Generates face mesh from JSON dictionary and puts it in faces_node
 func generate_faces(face_json):
-	$Faces.mesh.clear_surfaces()
+	faces_node.mesh.clear_surfaces()
 	
 	var verts = PackedVector3Array()
 	var normals = PackedVector3Array()
@@ -168,7 +172,7 @@ func generate_faces(face_json):
 	arr[Mesh.ARRAY_NORMAL] = normals
 	arr[Mesh.ARRAY_COLOR] = colors
 	
-	$Faces.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	faces_node.mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 
 
 func _on_LoadButton_pressed():
@@ -187,3 +191,7 @@ func _on_LoadButton_pressed():
 	print(eid)
 	load_edges(did, wvm, wvmid, eid)
 	load_faces(did, wvm, wvmid, eid)
+
+
+func _on_documents_http_request_request_completed(result, response_code, headers, body):
+	print(result, response_code, headers, body)

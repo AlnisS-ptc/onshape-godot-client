@@ -23,3 +23,5 @@ creds.gd
 .mono/
 data_*/
 mono_crash.*.json
+
+# Onshape API credentials
